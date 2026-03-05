@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oregon Trail (1971)</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono:wght@400&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #1a1a1a;
+            margin: 0;
+            padding: 15px;
+            min-height: 100vh;
+            font-family: 'Courier New', monospace;
+            position: relative;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 0;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .sidebar {
+            flex: 1;
+            color: #00FF00;
+            font-size: 12px;
+            line-height: 1.4;
+            padding: 0 20px 0 0;
+        }
+        
+        .sidebar h3 {
+            color: #00FF00;
+            font-size: 14px;
+            margin: 0 0 10px 0;
+            text-align: center;
+            border-bottom: 1px solid #00FF00;
+            padding: 0 20px 5px 20px;
+        }
+        
+        .sidebar p {
+            margin: 8px 0;
+            text-align: justify;
+            padding: 0 20px;
+        }
+        
+        .sidebar .highlight {
+            color: #00CC00;
+            font-weight: bold;
+        }
+        
+        .main-content {
+            flex: 0 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+        
+        /* Retro terminal screen */
+        .computer-screen {
+            background: #2a2a2a;
+            border: 8px solid #444;
+            border-radius: 8px;
+            box-shadow: 
+                0 0 20px rgba(0, 0, 0, 0.8),
+                inset 0 0 10px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 800px;
+            height: 70vh;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+            margin-top: 20px;
+        }
+        
+        /* Terminal content with retro styling */
+        .terminal {
+            background: #000;
+            color: #00FF00;
+            font-size: 14px;
+            line-height: 1.4;
+            font-family: 'Courier New', monospace;
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            text-align: left !important;
+            text-shadow: 0 0 3px #00FF00;
+            position: relative;
+        }
+        
+        /* CRT scan lines effect */
+        .terminal::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(transparent 50%, rgba(0, 255, 0, 0.03) 50%);
+            background-size: 100% 2px;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        /* Additional CRT effects */
+        .terminal::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at center, transparent 0%, rgba(0, 255, 0, 0.01) 100%);
+            pointer-events: none;
+            z-index: 2;
+        }
+        
+        
+        /* Custom retro scrollbar */
+        .terminal::-webkit-scrollbar {
+            width: 12px;
+        }
+        
+        .terminal::-webkit-scrollbar-track {
+            background: #1a1a1a;
+            border: 1px solid #333;
+        }
+        
+        .terminal::-webkit-scrollbar-thumb {
+            background: #00FF00;
+            border: 1px solid #00AA00;
+            border-radius: 2px;
+        }
+        
+        .terminal::-webkit-scrollbar-thumb:hover {
+            background: #00CC00;
+        }
+        
+        .game-content {
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            text-align: left;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .input-line {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+        }
+        
+        .input-field {
+            background: transparent;
+            border: none;
+            color: #00FF00;
+            font-family: inherit;
+            font-size: inherit;
+            outline: none;
+            flex: 1;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        /* Retro title */
+        .game-title {
+            text-align: left;
+            color: #00FF00;
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 5px #00FF00;
+            line-height: 1.3;
+        }
+        
+        .title-main {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .title-credits {
+            font-size: 12px;
+            color: #00AA00;
+            font-style: italic;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+                grid-template-areas: "sidebar" "game";
+                gap: 20px;
+            }
+            
+            .sidebar {
+                max-width: 800px;
+                padding: 0;
+            }
+            
+            .computer-screen {
+                width: 100%;
+                max-width: 600px;
+                height: 60vh;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .sidebar {
+                font-size: 11px;
+            }
+            
+            .computer-screen {
+                height: 50vh;
+                min-height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+        <h3>THE OREGON TRAIL HISTORY</h3>
+        
+        <p><span class="highlight">1971:</span> Don Rawitsch, Bill Heinemann, and Paul Dillenberger create the original game in just two weeks for 8th-grade history students at Jordan Junior High School in Minneapolis.</p>
+        
+        <p>The trio worked on an <span class="highlight">HP 2100 minicomputer</span> using teleprinters - no monitors! Students played in groups, voting on decisions and delegating roles like hunting and supply tracking.</p>
+        
+        <p><span class="highlight">1974:</span> Rawitsch recreates the game for MECC (Minnesota Educational Computing Consortium), adding historical research and accurate probabilities based on pioneer diaries.</p>
+        
+        <p>The game became the <span class="highlight">most popular educational software</span> in Minnesota schools for five years, with thousands of monthly players.</p>
+        
+        <p><span class="highlight">1975:</span> MECC distributes the game across Minnesota schools via time-sharing network.</p>
+        
+        <p><span class="highlight">1978:</span> Rawitsch publishes the source code in Creative Computing magazine, making it available to the world.</p>
+        
+        <p>The game was so popular that students would <span class="highlight">line up outside the door</span> for their turn and stay after school for another chance to play!</p>
+        
+        <p>Future musician <span class="highlight">Prince</span> was one of the students who tested the original game at Bryant Junior High School.</p>
+        
+        <p>The creators weren't publicly acknowledged until <span class="highlight">1995</span> when MECC honored them at the Mall of America.</p>
+        
+        <p>Over <span class="highlight">65 million copies</span> of Oregon Trail games have been sold, and the series is in the World Video Game Hall of Fame.</p>
+        
+        <p><span class="highlight">Fun Fact:</span> The original game was deleted from the school's mainframe at semester's end - Rawitsch had to recreate it from printed code!</p>
+        
+        <h3>GAMEPLAY & HISTORICAL ACCURACY</h3>
+        
+        <p>Data on the Oregon Trail was collected from books and diaries and provided accurate information regarding the cost of goods, types of supplies to buy, and the frequency of disasters (i.e. bad weather occurs 20% of the time and injuries 5% of the time in the diaries, so they occur at the same rate in the game). The code also detects where the player is on the trail and adjust random events accordingly (i.e. it snows in the mountains and river disasters occur on the plains).</p>
+        
+        <p>Unlike the graphical version, the original version was text-based. Each turn, players would type their choice (stop, hunt, or continue; eat well, moderate, or poorly) and the game would load an event subroutine to let you know what kind of disaster occurred this turn. After making a choice in the event sequence, the game tallies up the results and continues until the player either dies or reaches Oregon.</p>
+        
+        <h3>2025 MODERN RECREATION</h3>
+        
+        <p>This reconstruction preserves the original game logic while adapting it for modern web browsers. The JavaScript implementation maintains the exact same probability distributions, event sequences, and mathematical formulas as the 1971 BASIC version.</p>
+        
+        <p>The web version features a <span class="highlight">retro terminal aesthetic</span> with CRT scan lines and authentic green-on-black styling. Interactive shooting mini-games use real-time timing, and the historical sidebar provides fascinating context about the game's educational legacy.</p>
+        
+        <p>Multiple platform ports are available: <span class="highlight">HP BASIC</span> (original), <span class="highlight">Commodore 64</span>, <span class="highlight">Sinclair Spectrum</span>, and this <span class="highlight">HTML5/JavaScript</span> version - each preserving the authentic gameplay experience across different computing eras.</p>
+    </div>
+    
+    <div class="main-content">
+        <div class="game-title">
+            <div class="title-main">THE OREGON TRAIL (1971)</div>
+            <div class="title-credits">ORIGINAL BY DON RAWITSCH, BILL HEINEMANN & PAUL DILLENBERGER</div>
+            <div class="title-credits">2025 RECONSTRUCTION BY PHIL SPILSBURY</div>
+        </div>
+        
+        <div class="computer-screen">
+            <div class="terminal">
+                <div id="game-content" class="game-content">
+                    <!-- Game content will be dynamically populated -->
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    
+    <script>
+        // Game State - Exact port from original BASIC
+        const gameState = {
+            // Resources (matching original variables)
+            cash: 700,           // T
+            food: 0,             // F  
+            bullets: 0,          // B
+            clothing: 0,         // C
+            miscSupplies: 0,    // M1
+            oxen: 0,            // A
+            
+            // Progress
+            mileage: 0,         // M
+            turn: 0,            // D3
+            date: "MONDAY MARCH 29 1847",
+            
+            // Flags
+            injured: false,      // K8
+            sick: false,        // S4
+            clearedSouthPass: false,  // F1
+            clearedBlueMountains: false, // F2
+            blizzard: false,    // L1
+            
+            // Settings
+            shootingSkill: 0,   // D9
+            eatingLevel: 0,     // E
+            
+            // Game status
+            gameOver: false,
+            won: false,
+            
+            // Fort option flag (X1 in original)
+            x1: -1  // -1 = no fort option, 1 = fort available
+        };
+        
+        // DOM elements
+        const gameContent = document.getElementById('game-content');
+        let currentInput = null;
+        let waitingForInput = false;
+        
+        // Utility functions
+        function random() {
+            return Math.random();
+        }
+        
+        function addText(text) {
+            const textNode = document.createTextNode(text);
+            gameContent.appendChild(textNode);
+            scrollToBottom();
+        }
+        
+        function addLine(text = '') {
+            addText(text + '\n');
+        }
+        
+        function scrollToBottom() {
+            const terminal = document.querySelector('.terminal');
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+        
+        function addInput(prompt, callback, inline = true) {
+            waitingForInput = true;
+            
+            if (inline) {
+                // Add prompt with ? on same line, then input field on same line
+                addText(prompt + '?');
+                
+                const inputField = document.createElement('input');
+                inputField.className = 'input-field';
+                inputField.type = 'text';
+                inputField.autocomplete = 'off';
+                inputField.spellcheck = false;
+                inputField.style.display = 'inline';
+                inputField.style.width = '200px';
+                inputField.style.marginLeft = '5px';
+                
+                gameContent.appendChild(inputField);
+                inputField.focus();
+                scrollToBottom();
+                
+                inputField.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        const value = inputField.value.trim();
+                        // Show the user's input with a space
+                        addText(' ' + value);
+                        addLine();
+                        inputField.remove();
+                        waitingForInput = false;
+                        currentInput = value;
+                        callback(value);
+                    }
+                });
+            } else {
+                // Add prompt on new line, then input on next line
+                addLine(prompt);
+                addText('?');
+                
+                const inputLine = document.createElement('div');
+                inputLine.className = 'input-line';
+                
+                const inputField = document.createElement('input');
+                inputField.className = 'input-field';
+                inputField.type = 'text';
+                inputField.autocomplete = 'off';
+                inputField.spellcheck = false;
+                
+                inputLine.appendChild(inputField);
+                gameContent.appendChild(inputLine);
+                
+                inputField.focus();
+                scrollToBottom();
+                
+                inputField.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        const value = inputField.value.trim();
+                        // Show the user's input with a space
+                        addText(' ' + value);
+                        addLine();
+                        inputLine.remove();
+                        waitingForInput = false;
+                        currentInput = value;
+                        callback(value);
+                    }
+                });
+            }
+        }
+        
+        function addNumericInput(prompt, callback) {
+            addInput(prompt, (value) => {
+                const num = parseFloat(value);
+                if (isNaN(num)) {
+                    addLine("INVALID INPUT. PLEASE ENTER A NUMBER.");
+                    addNumericInput(prompt, callback);
+                } else {
+                    callback(num);
+                }
+            });
+        }
+        
+        // Helper function for shooting mini-game (used in events)
+        function performShooting() {
+            const shootingWords = ["BANG", "BLAM", "POW", "WHAM"];
+            const shootingWord = shootingWords[Math.floor(random() * 4)];
+            
+            addLine(`TYPE ${shootingWord}`);
+            
+            const startTime = Date.now();
+            
+            return new Promise((resolve) => {
+                addInput("", (userInput) => {
+                    const endTime = Date.now();
+                    const responseTime = endTime - startTime;
+                    
+                    let result = 5; // Default miss
+                    
+                    if (userInput.toUpperCase() === shootingWord) {
+                        // Calculate result based on response time and skill
+                        const timeBonus = Math.max(0, 1000 - responseTime);
+                        const skillBonus = (gameState.shootingSkill - 1) * 200;
+                        result = Math.max(1, Math.floor((timeBonus + skillBonus) / 200));
+                    }
+                    
+                    resolve(result);
+                });
+            });
+        }
+        
+        // Riders attack system
+        function handleRidersAttack() {
+            addLine("RIDERS AHEAD.  THEY ");
+            const hostile = random() < 0.8;
+            if (!hostile) {
+                addLine("DON'T ");
+            }
+            addLine("LOOK HOSTILE");
+            addLine("TACTICS");
+            addLine("(1) RUN  (2) ATTACK  (3) CONTINUE  (4) CIRCLE WAGONS");
+            
+            // Randomly change hostility
+            const finalHostile = random() > 0.2 ? hostile : !hostile;
+            
+            addNumericInput("", (tactic) => {
+                if (tactic < 1 || tactic > 4) {
+                    handleRidersAttack();
+                    return;
+                }
+                
+                if (finalHostile) {
+                    handleHostileRiders(tactic);
+                } else {
+                    handleFriendlyRiders(tactic);
+                }
+            });
+        }
+        
+        function handleHostileRiders(tactic) {
+            if (tactic === 1) { // RUN
+                addLine("RIDERS WERE HOSTILE--CHECK FOR LOSSES");
+                gameState.mileage += 20;
+                gameState.miscSupplies -= 15;
+                gameState.bullets -= 150;
+                gameState.oxen -= 40;
+            } else if (tactic === 2) { // ATTACK
+                performShooting().then((shootingResult) => {
+                    gameState.bullets -= (shootingResult * 40 + 80);
+                    
+                    if (gameState.bullets < 0) {
+                        addLine("YOU RAN OUT OF BULLETS AND GOT MASSACRED BY THE RIDERS");
+                        gameOver();
+                        return;
+                    }
+                    
+                    if (shootingResult <= 1) {
+                        addLine("NICE SHOOTING---YOU DROVE THEM OFF");
+                    } else if (shootingResult <= 4) {
+                        addLine("KINDA SLOW WITH YOUR COLT .45");
+                    } else {
+                        addLine("LOUSY SHOT---YOU GOT KNIFED");
+                        gameState.injured = true;
+                        addLine("YOU HAVE TO SEE OL' DOC BLANCHARD");
+                    }
+                    continueJourney();
+                });
+                return;
+            } else if (tactic === 3) { // CONTINUE
+                if (random() > 0.8) {
+                    addLine("THEY DID NOT ATTACK");
+                } else {
+                    addLine("RIDERS WERE HOSTILE--CHECK FOR LOSSES");
+                    gameState.bullets -= 150;
+                    gameState.miscSupplies -= 15;
+                }
+            } else { // CIRCLE WAGONS
+                performShooting().then((shootingResult) => {
+                    gameState.bullets -= (shootingResult * 30 + 80);
+                    gameState.mileage -= 25;
+                    
+                    if (shootingResult <= 1) {
+                        addLine("NICE SHOOTING---YOU DROVE THEM OFF");
+                    } else if (shootingResult <= 4) {
+                        addLine("KINDA SLOW WITH YOUR COLT .45");
+                    } else {
+                        addLine("LOUSY SHOT---YOU GOT KNIFED");
+                        gameState.injured = true;
+                        addLine("YOU HAVE TO SEE OL' DOC BLANCHARD");
+                    }
+                    continueJourney();
+                });
+                return;
+            }
+            
+            continueJourney();
+        }
+        
+        function handleFriendlyRiders(tactic) {
+            if (tactic === 1) { // RUN
+                addLine("RIDERS WERE FRIENDLY, BUT CHECK FOR POSSIBLE LOSSES");
+                gameState.mileage += 15;
+                gameState.oxen -= 10;
+            } else if (tactic === 2) { // ATTACK
+                addLine("RIDERS WERE FRIENDLY, BUT CHECK FOR POSSIBLE LOSSES");
+                gameState.mileage -= 5;
+                gameState.bullets -= 100;
+            } else if (tactic === 3) { // CONTINUE
+                addLine("RIDERS WERE FRIENDLY, BUT CHECK FOR POSSIBLE LOSSES");
+                // No losses for friendly riders
+            } else { // CIRCLE WAGONS
+                addLine("RIDERS WERE FRIENDLY, BUT CHECK FOR POSSIBLE LOSSES");
+                gameState.mileage -= 20;
+            }
+            
+            continueJourney();
+        }
+        
+        // Illness system
+        function triggerIllness() {
+            const illnessRoll = random() * 100;
+            const eatingLevel = gameState.eatingLevel || 2;
+            
+            if (illnessRoll < (10 + 35 * (eatingLevel - 1))) {
+                addLine("MILD ILLNESS---MEDICINE USED");
+                gameState.mileage -= 5;
+                gameState.miscSupplies -= 2;
+            } else if (illnessRoll < (100 - (40 / Math.pow(4, eatingLevel - 1)))) {
+                addLine("SERIOUS ILLNESS---");
+                addLine("YOU MUST STOP FOR MEDICAL ATTENTION");
+                gameState.miscSupplies -= 10;
+                gameState.sick = true;
+            } else {
+                addLine("BAD ILLNESS---MEDICINE USED");
+                gameState.mileage -= 5;
+                gameState.miscSupplies -= 5;
+            }
+            
+            if (gameState.miscSupplies < 0) {
+                addLine("YOU RAN OUT OF MEDICAL SUPPLIES");
+                gameOver();
+                return;
+            }
+        }
+        
+        // Mountain events
+        function handleMountainEvents() {
+            const mountainRoll = random() * 10;
+            const mountainChance = 9 - ((gameState.mileage / 100 - 15) ** 2 + 72) / ((gameState.mileage / 100 - 15) ** 2 + 12);
+            
+            if (mountainRoll > mountainChance) {
+                addLine("RUGGED MOUNTAINS");
+                
+                if (random() <= 0.1) {
+                    addLine("YOU GOT LOST---LOSE VALUABLE TIME TRYING TO FIND TRAIL!");
+                    gameState.mileage -= 60;
+                } else if (random() <= 0.11) {
+                    addLine("WAGON DAMAGED!---LOSE TIME AND SUPPLIES");
+                    gameState.miscSupplies -= 5;
+                    gameState.bullets -= 200;
+                    gameState.mileage -= (20 + Math.floor(random() * 30));
+                } else {
+                    addLine("THE GOING GETS SLOW");
+                    gameState.mileage -= (45 + Math.floor(random() * 50));
+                }
+                
+                // South Pass logic
+                if (!gameState.clearedSouthPass) {
+                    gameState.clearedSouthPass = true;
+                    if (random() < 0.8) {
+                        addLine("YOU MADE IT SAFELY THROUGH SOUTH PASS--NO SNOW");
+                    } else {
+                        addLine("BLIZZARD IN MOUNTAIN PASS--TIME AND SUPPLIES LOST");
+                        gameState.blizzard = true;
+                        gameState.food -= 25;
+                        gameState.miscSupplies -= 10;
+                        gameState.bullets -= 300;
+                        gameState.mileage -= (30 + Math.floor(random() * 40));
+                        
+                        if (gameState.clothing < (18 + Math.floor(random() * 2))) {
+                            triggerIllness();
+                        }
+                    }
+                }
+                
+                // Blue Mountains logic
+                if (gameState.mileage >= 1700 && !gameState.clearedBlueMountains) {
+                    gameState.clearedBlueMountains = true;
+                    if (random() < 0.7) {
+                        addLine("YOU MADE IT SAFELY THROUGH THE BLUE MOUNTAINS");
+                    } else {
+                        addLine("BLIZZARD IN MOUNTAIN PASS--TIME AND SUPPLIES LOST");
+                        gameState.blizzard = true;
+                        gameState.food -= 25;
+                        gameState.miscSupplies -= 10;
+                        gameState.bullets -= 300;
+                        gameState.mileage -= (30 + Math.floor(random() * 40));
+                        
+                        if (gameState.clothing < (18 + Math.floor(random() * 2))) {
+                            triggerIllness();
+                        }
+                    }
+                }
+            }
+        }
+        
+        function updateStatus() {
+            addLine();
+            addLine(gameState.date);
+            addLine();
+            addLine(`TOTAL MILEAGE IS ${gameState.mileage}`);
+            addLine();
+            addLine("FOOD        BULLETS     CLOTHING    MISC. SUPP.    CASH");
+            addLine(`${gameState.food.toString().padEnd(12)}${gameState.bullets.toString().padEnd(12)}${gameState.clothing.toString().padEnd(12)}${gameState.miscSupplies.toString().padEnd(12)}${gameState.cash}`);
+        }
+        
+        // Game functions - following original BASIC flow exactly
+        function showInstructions() {
+            addLine();
+            addLine();
+            addLine("THIS PROGRAM SIMULATES A TRIP OVER THE OREGON TRAIL FROM");
+            addLine("INDEPENDENCE MISSOURI TO OREGON CITY, OREGON IN 1847.");
+            addLine("YOUR FAMILY OF FIVE WILL COVER THE 2040 MILE OREGON TRAIL");
+            addLine("IN 5-6 MONTHS --- IF YOU MAKE IT ALIVE.");
+            addLine();
+            addLine("YOU HAD SAVED $900 TO SPEND FOR THE TRIP, AND YOU'VE JUST");
+            addLine("   PAID $200 FOR A WAGON.");
+            addLine("YOU WILL NEED TO SPEND THE REST OF YOUR MONEY ON THE");
+            addLine("   FOLLOWING ITEMS:");
+            addLine();
+            addLine("     OXEN . YOU CAN SPEND $200-$300 ON YOUR TEAM");
+            addLine("            THE MORE YOU SPEND, THE FASTER YOU'LL GO");
+            addLine("               BECAUSE YOU'LL HAVE BETTER ANIMALS");
+            addLine();
+            addLine("     FOOD . THE MORE YOU HAVE, THE LESS CHANCE THERE");
+            addLine("               IS OF GETTING SICK");
+            addLine();
+            addLine("     AMMUNITION - $1 BUYS A BELT OF 50 BULLETS");
+            addLine("            YOU WILL NEED BULLETS FOR ATTACKS BY ANIMALS");
+            addLine("               AND BANDITS, AND FOR HUNTING FOOD");
+            addLine();
+            addLine("     CLOTHING . THIS IS ESPECIALLY IMPORTANT FOR THE COLD");
+            addLine("               WEATHER YOU WILL ENCOUNTER WHEN CROSSING");
+            addLine("               THE MOUNTAINS");
+            addLine();
+            addLine("     MISCELLANEOUS SUPPLIES . THIS INCLUDES MEDICINE AND");
+            addLine("               OTHER THINGS YOU WILL NEED FOR SICKNESS");
+            addLine("               AND EMERGENCY REPAIRS");
+            addLine();
+            addLine();
+            addLine("YOU CAN SPEND ALL YOUR MONEY BEFORE YOU START YOUR TRIP -");
+            addLine("OR YOU CAN SAVE SOME OF YOUR CASH TO SPEND AT FORTS ALONG");
+            addLine("THE WAY WHEN YOU RUN LOW. HOWEVER, ITEMS COST MORE AT");
+            addLine("THE FORTS. YOU CAN ALSO GO HUNTING ALONG THE WAY TO GET");
+            addLine("MORE FOOD.");
+            addLine("WHENEVER YOU HAVE TO USE YOUR TRUSTY RIFLE ALONG THE WAY,");
+            addLine("YOU WILL BE TOLD TO TYPE IN A WORD (ONE THAT SOUNDS LIKE A");
+            addLine("GUN SHOT). THE FASTER YOU TYPE IN THAT WORD AND HIT THE");
+            addLine("**RETURN** KEY, THE BETTER LUCK YOU'LL HAVE WITH YOUR GUN.");
+            addLine();
+            addLine("AT EACH TURN, ALL ITEMS ARE SHOWN IN DOLLAR AMOUNTS");
+            addLine("EXCEPT BULLETS");
+            addLine("WHEN ASKED TO ENTER MONEY AMOUNTS, DON'T USE A **$**.");
+            addLine();
+            addLine("GOOD LUCK!!!");
+            addLine();
+            addLine();
+            askShootingSkill();
+        }
+        
+        function startPurchases() {
+            addLine();
+            addLine();
+            addInput("HOW MUCH DO YOU WANT TO SPEND ON YOUR OXEN TEAM", (oxenAmount) => {
+                const num = parseFloat(oxenAmount);
+                if (isNaN(num)) {
+                    addLine("INVALID INPUT. PLEASE ENTER A NUMBER.");
+                    startPurchases();
+                    return;
+                }
+                if (num < 200) {
+                    addLine("NOT ENOUGH");
+                    startPurchases();
+                    return;
+                }
+                if (num > 300) {
+                    addLine("TOO MUCH");
+                    startPurchases();
+                    return;
+                }
+                
+                gameState.oxen = num;
+                addInput("HOW MUCH DO YOU WANT TO SPEND ON FOOD", (foodAmount) => {
+                    const num = parseFloat(foodAmount);
+                    if (isNaN(num)) {
+                        addLine("INVALID INPUT. PLEASE ENTER A NUMBER.");
+                        startPurchases();
+                        return;
+                    }
+                    if (num < 0) {
+                        addLine("IMPOSSIBLE");
+                        startPurchases();
+                        return;
+                    }
+                    
+                    gameState.food = num;
+                    addInput("HOW MUCH DO YOU WANT TO SPEND ON AMMUNITION", (ammoAmount) => {
+                        const num = parseFloat(ammoAmount);
+                        if (isNaN(num)) {
+                            addLine("INVALID INPUT. PLEASE ENTER A NUMBER.");
+                            startPurchases();
+                            return;
+                        }
+                        if (num < 0) {
+                            addLine("IMPOSSIBLE");
+                            startPurchases();
+                            return;
+                        }
+                        
+                        gameState.bullets = num * 50; // Convert to bullets
+                        addInput("HOW MUCH DO YOU WANT TO SPEND ON CLOTHING", (clothingAmount) => {
+                            const num = parseFloat(clothingAmount);
+                            if (isNaN(num)) {
+                                addLine("INVALID INPUT. PLEASE ENTER A NUMBER.");
+                                startPurchases();
+                                return;
+                            }
+                            if (num < 0) {
+                                addLine("IMPOSSIBLE");
+                                startPurchases();
+                                return;
+                            }
+                            
+                            gameState.clothing = num;
+                            addInput("HOW MUCH DO YOU WANT TO SPEND ON MISCELLANEOUS SUPPLIES", (miscAmount) => {
+                                const num = parseFloat(miscAmount);
+                                if (isNaN(num)) {
+                                    addLine("INVALID INPUT. PLEASE ENTER A NUMBER.");
+                                    startPurchases();
+                                    return;
+                                }
+                                if (num < 0) {
+                                    addLine("IMPOSSIBLE");
+                                    startPurchases();
+                                    return;
+                                }
+                                
+                                gameState.miscSupplies = num;
+                                const total = gameState.oxen + gameState.food + (gameState.bullets / 50) + gameState.clothing + gameState.miscSupplies;
+                                gameState.cash = 700 - total;
+                                
+                                if (gameState.cash < 0) {
+                                    addLine("YOU OVERSPENT.YOU ONLY HAD $700 TO SPEND. BUY AGAIN");
+                                    startPurchases();
+                                    return;
+                                }
+                                
+                                addLine(`AFTER ALL YOUR PURCHASES, YOU NOW HAVE ${gameState.cash} DOLLARS LEFT`);
+                                addLine();
+                                addLine("MONDAY MARCH 29 1847");
+                                addLine();
+                                startGame();
+                            });
+                        });
+                    });
+                });
+            });
+        }
+        
+        function startGame() {
+            if (gameState.mileage >= 2040) {
+                victory();
+                return;
+            }
+            
+            // Flip x1 flag after first turn (like original)
+            if (gameState.turn > 0) {
+                gameState.x1 = gameState.x1 * -1;
+            }
+            
+            // Check for low food
+            if (gameState.food < 13) {
+                addLine("YOU'D BETTER DO SOME HUNTING OR BUY FOOD AND SOON!!!!");
+            }
+            
+            updateStatus();
+            
+            // Show different options based on x1 flag (like original)
+            if (gameState.x1 === 1) {
+                addLine("DO YOU WANT TO (1) STOP AT THE NEXT FORT, (2) HUNT, OR (3) CONTINUE");
+                
+                addNumericInput("", (choice) => {
+                    if (choice === 1) {
+                        stopAtFort();
+                    } else if (choice === 2) {
+                        if (gameState.bullets < 40) {
+                            addLine("TOUGH---YOU NEED MORE BULLETS TO GO HUNTING");
+                            startGame();
+                            return;
+                        }
+                        hunt();
+                    } else {
+                        continueJourney();
+                    }
+                });
+            } else {
+                addLine("DO YOU WANT TO (1) HUNT, OR (2) CONTINUE");
+                
+                addNumericInput("", (choice) => {
+                    if (choice === 1) {
+                        if (gameState.bullets < 40) {
+                            addLine("TOUGH---YOU NEED MORE BULLETS TO GO HUNTING");
+                            startGame();
+                            return;
+                        }
+                        hunt();
+                    } else {
+                        continueJourney();
+                    }
+                });
+            }
+        }
+        
+        function hunt() {
+            gameState.mileage -= 45;
+            addLine();
+            addLine("HUNTING...");
+            
+            const shootingWords = ["BANG", "BLAM", "POW", "WHAM"];
+            const shootingWord = shootingWords[Math.floor(random() * 4)];
+            
+            addLine(`TYPE ${shootingWord}`);
+            
+            const startTime = Date.now();
+            addInput("", (userInput) => {
+                const endTime = Date.now();
+                const responseTime = endTime - startTime;
+                
+                if (userInput.toUpperCase() === shootingWord) {
+                    const success = responseTime < (1000 - (gameState.shootingSkill - 1) * 200);
+                    if (success) {
+                        addLine("NICE SHOT.RIGHT ON TARGET.GOOD EATIN' TONIGHT!!");
+                        gameState.food += 48;
+                        gameState.bullets -= 10;
+                    } else {
+                        addLine("YOU MISSED---AND YOUR DINNER GOT AWAY.....");
+                    }
+                } else {
+                    addLine("YOU MISSED---AND YOUR DINNER GOT AWAY.....");
+                }
+                
+                // Flip x1 flag after hunting (like original)
+                gameState.x1 = gameState.x1 * -1;
+                continueJourney();
+            });
+        }
+        
+        function stopAtFort() {
+            addLine();
+            addLine("ENTER WHAT YOU WISH TO SPEND ON THE FOLLOWING");
+            
+            addNumericInput("FOOD", (foodSpend) => {
+                if (foodSpend < 0) {
+                    addLine("IMPOSSIBLE");
+                    stopAtFort();
+                    return;
+                }
+                
+                addNumericInput("AMMUNITION", (ammoSpend) => {
+                    if (ammoSpend < 0) {
+                        addLine("IMPOSSIBLE");
+                        stopAtFort();
+                        return;
+                    }
+                    
+                    addNumericInput("CLOTHING", (clothingSpend) => {
+                        if (clothingSpend < 0) {
+                            addLine("IMPOSSIBLE");
+                            stopAtFort();
+                            return;
+                        }
+                        
+                        addNumericInput("MISCELLANEOUS SUPPLIES", (miscSpend) => {
+                            if (miscSpend < 0) {
+                                addLine("IMPOSSIBLE");
+                                stopAtFort();
+                                return;
+                            }
+                            
+                            const totalSpend = foodSpend + ammoSpend + clothingSpend + miscSpend;
+                            if (totalSpend > gameState.cash) {
+                                addLine("YOU OVERSPENT.YOU ONLY HAD $" + gameState.cash + " TO SPEND. BUY AGAIN");
+                                stopAtFort();
+                                return;
+                            }
+                            
+                            // Update resources
+                            gameState.food += foodSpend;
+                            gameState.bullets += ammoSpend * 50; // Bullets are 50 per dollar
+                            gameState.clothing += clothingSpend;
+                            gameState.miscSupplies += miscSpend;
+                            gameState.cash -= totalSpend;
+                            
+                            addLine("AFTER ALL YOUR PURCHASES, YOU NOW HAVE " + gameState.cash + " DOLLARS LEFT");
+                            
+                            // Flip x1 flag after fort visit (like original)
+                            gameState.x1 = gameState.x1 * -1;
+                            continueJourney();
+                        });
+                    });
+                });
+            });
+        }
+        
+        function continueJourney() {
+            // Check for low food
+            if (gameState.food < 13) {
+                addLine("YOU RAN OUT OF FOOD AND STARVED TO DEATH");
+                gameOver();
+                return;
+            }
+            
+            // Eating
+            addLine("DO YOU WANT TO EAT (1) POORLY  (2) MODERATELY");
+            addLine("OR (3) WELL");
+            
+            addNumericInput("", (eatingChoice) => {
+                if (eatingChoice < 1 || eatingChoice > 3) {
+                    continueJourney();
+                    return;
+                }
+                
+                const foodConsumption = 8 + 5 * eatingChoice;
+                if (gameState.food < foodConsumption) {
+                    addLine("YOU CAN'T EAT THAT WELL");
+                    continueJourney();
+                    return;
+                }
+                
+                gameState.food -= foodConsumption;
+                gameState.eatingLevel = eatingChoice;
+                
+                // Advance mileage
+                const mileageGain = 200 + (gameState.oxen - 220) / 5 + random() * 10;
+                gameState.mileage += Math.floor(mileageGain);
+                
+                // Check for riders attack first (separate from other events)
+                const ridersChance = ((gameState.mileage / 100 - 4) ** 2 + 72) / ((gameState.mileage / 100 - 4) ** 2 + 12) - 1;
+                if (random() * 10 > ridersChance) {
+                    handleRidersAttack();
+                    return;
+                }
+                
+                // Random events - ALL original events with exact probabilities
+                const eventRoll = random() * 100;
+                let eventOccurred = false;
+                
+                // Event 1: WAGON BREAKS DOWN (probability 6)
+                if (eventRoll < 6 && !eventOccurred) {
+                    addLine("WAGON BREAKS DOWN--LOSE TIME AND SUPPLIES FIXING IT");
+                    gameState.mileage -= (15 + Math.floor(random() * 5));
+                    gameState.miscSupplies -= 8;
+                    eventOccurred = true;
+                }
+                // Event 2: OX INJURES LEG (probability 11)
+                else if (eventRoll < 11 && !eventOccurred) {
+                    addLine("OX INJURES LEG---SLOWS YOU DOWN REST OF TRIP");
+                    gameState.mileage -= 25;
+                    gameState.oxen -= 20;
+                    eventOccurred = true;
+                }
+                // Event 3: DAUGHTER BROKE ARM (probability 13)
+                else if (eventRoll < 13 && !eventOccurred) {
+                    addLine("BAD LUCK---YOUR DAUGHTER BROKE HER ARM");
+                    addLine("YOU HAD TO STOP AND USE SUPPLIES TO MAKE A SLING");
+                    gameState.mileage -= (5 + Math.floor(random() * 4));
+                    gameState.miscSupplies -= (2 + Math.floor(random() * 3));
+                    eventOccurred = true;
+                }
+                // Event 4: OX WANDERS OFF (probability 15)
+                else if (eventRoll < 15 && !eventOccurred) {
+                    addLine("OX WANDERS OFF---SPEND TIME LOOKING FOR IT");
+                    gameState.mileage -= 17;
+                    eventOccurred = true;
+                }
+                // Event 5: SON GETS LOST (probability 17)
+                else if (eventRoll < 17 && !eventOccurred) {
+                    addLine("YOUR SON GETS LOST---SPEND HALF THE DAY LOOKING FOR HIM");
+                    gameState.mileage -= 10;
+                    eventOccurred = true;
+                }
+                // Event 6: UNSAFE WATER (probability 22)
+                else if (eventRoll < 22 && !eventOccurred) {
+                    addLine("UNSAFE WATER--LOSE TIME LOOKING FOR CLEAN SPRING");
+                    gameState.mileage -= (Math.floor(random() * 10) + 2);
+                    eventOccurred = true;
+                }
+                // Event 7: HEAVY RAINS (probability 32) - only before 950 miles
+                else if (eventRoll < 32 && !eventOccurred && gameState.mileage <= 950) {
+                    addLine("HEAVY RAINS---TIME AND SUPPLIES LOST");
+                    gameState.food -= 10;
+                    gameState.bullets -= 500;
+                    gameState.miscSupplies -= 15;
+                    gameState.mileage -= (Math.floor(random() * 10) + 5);
+                    eventOccurred = true;
+                }
+                // Event 8: BANDITS ATTACK (probability 35)
+                else if (eventRoll < 35 && !eventOccurred) {
+                    addLine("BANDITS ATTACK");
+                    performShooting().then((shootingResult) => {
+                        gameState.bullets -= (20 * shootingResult);
+                        
+                        if (gameState.bullets < 0) {
+                            addLine("YOU RAN OUT OF BULLETS -- THEY GET LOTS OF CASH");
+                            gameState.cash = Math.floor(gameState.cash / 3);
+                        } else if (shootingResult <= 1) {
+                            addLine("QUICKEST DRAW OUTSIDE OF DODGE CITY!!!");
+                            addLine("YOU GOT 'EM!");
+                        } else {
+                            addLine("YOU GOT SHOT IN THE LEG AND THEY TOOK ONE OF YOUR OXEN");
+                            gameState.injured = true;
+                            addLine("BETTER HAVE A DOC LOOK AT YOUR WOUND");
+                            gameState.miscSupplies -= 5;
+                            gameState.oxen -= 20;
+                        }
+                        continueJourney();
+                    });
+                    return;
+                }
+                // Event 9: FIRE IN WAGON (probability 37)
+                else if (eventRoll < 37 && !eventOccurred) {
+                    addLine("THERE WAS A FIRE IN YOUR WAGON--FOOD AND SUPPLIES DAMAGED");
+                    gameState.food -= 40;
+                    gameState.bullets -= 400;
+                    gameState.miscSupplies -= (Math.floor(random() * 8) + 3);
+                    gameState.mileage -= 15;
+                    eventOccurred = true;
+                }
+                // Event 10: LOSE WAY IN FOG (probability 42)
+                else if (eventRoll < 42 && !eventOccurred) {
+                    addLine("LOSE YOUR WAY IN HEAVY FOG---TIME IS LOST");
+                    gameState.mileage -= (10 + Math.floor(random() * 5));
+                    eventOccurred = true;
+                }
+                // Event 11: POISONOUS SNAKE (probability 44)
+                else if (eventRoll < 44 && !eventOccurred) {
+                    addLine("YOU KILLED A POISONOUS SNAKE AFTER IT BIT YOU");
+                    gameState.bullets -= 10;
+                    gameState.miscSupplies -= 5;
+                    if (gameState.miscSupplies < 0) {
+                        addLine("YOU DIE OF SNAKEBITE SINCE YOU HAVE NO MEDICINE");
+                        gameOver();
+                        return;
+                    }
+                    eventOccurred = true;
+                }
+                // Event 12: WAGON SWAMPED (probability 54)
+                else if (eventRoll < 54 && !eventOccurred) {
+                    addLine("YOUR WAGON GETS SWAMPED FORDING RIVER--LOSE FOOD AND CLOTHES");
+                    gameState.food -= 30;
+                    gameState.clothing -= 20;
+                    gameState.mileage -= (20 + Math.floor(random() * 20));
+                    eventOccurred = true;
+                }
+                // Event 13: WILD ANIMALS ATTACK (probability 64)
+                else if (eventRoll < 64 && !eventOccurred) {
+                    addLine("WILD ANIMALS ATTACK!");
+                    if (gameState.bullets < 40) {
+                        addLine("YOU WERE TOO LOW ON BULLETS--");
+                        addLine("THE WOLVES OVERPOWERED YOU");
+                        gameState.injured = true;
+                        gameOver();
+                        return;
+                    }
+                    
+                    performShooting().then((shootingResult) => {
+                        gameState.bullets -= (20 * shootingResult);
+                        gameState.clothing -= (shootingResult * 4);
+                        gameState.food -= (shootingResult * 8);
+                        
+                        if (shootingResult <= 2) {
+                            addLine("NICE SHOOTIN' PARDNER---THEY DIDN'T GET MUCH");
+                        } else {
+                            addLine("SLOW ON THE DRAW---THEY GOT AT YOUR FOOD AND CLOTHES");
+                        }
+                        continueJourney();
+                    });
+                    return;
+                }
+                // Event 14: COLD WEATHER (probability 69)
+                else if (eventRoll < 69 && !eventOccurred) {
+                    addLine("COLD WEATHER -- BRRRRRR! -- YOU ");
+                    if (gameState.clothing > (22 + Math.floor(random() * 4))) {
+                        addLine("HAVE ENOUGH CLOTHING TO KEEP WARM");
+                    } else {
+                        addLine("DON'T HAVE ENOUGH CLOTHING TO KEEP WARM");
+                        // This triggers illness
+                        triggerIllness();
+                    }
+                    eventOccurred = true;
+                }
+                // Event 15: HAIL STORM (probability 95)
+                else if (eventRoll < 95 && !eventOccurred) {
+                    addLine("HAIL STORM---SUPPLIES DAMAGED");
+                    gameState.mileage -= (5 + Math.floor(random() * 10));
+                    gameState.bullets -= 200;
+                    gameState.miscSupplies -= (4 + Math.floor(random() * 3));
+                    eventOccurred = true;
+                }
+                // Event 16: HELPFUL INDIANS (probability 100 - default)
+                else if (!eventOccurred) {
+                    addLine("HELPFUL INDIANS SHOW YOU WHERE TO FIND MORE FOOD");
+                    gameState.food += 14;
+                    eventOccurred = true;
+                }
+                
+                // Check for mountain events if past 950 miles
+                if (gameState.mileage > 950) {
+                    handleMountainEvents();
+                }
+                
+                if (gameState.mileage >= 2040) {
+                    victory();
+                    return;
+                }
+                
+                startGame();
+            });
+        }
+        
+        function gameOver() {
+            addLine();
+            addLine("DUE TO YOUR UNFORTUNATE SITUATION, THERE ARE A FEW");
+            addLine("FORMALITIES WE MUST GO THROUGH");
+            addLine();
+            addLine("WOULD YOU LIKE A MINISTER?");
+            addLine("WOULD YOU LIKE A FANCY FUNERAL?");
+            addLine("WOULD YOU LIKE US TO INFORM YOUR NEXT OF KIN?");
+            addLine("BUT YOUR AUNT SADIE IN ST. LOUIS IS REALLY WORRIED ABOUT YOU");
+            addLine();
+            addLine("WE THANK YOU FOR THIS INFORMATION AND WE ARE SORRY YOU");
+            addLine("DIDN'T MAKE IT TO THE GREAT TERRITORY OF OREGON");
+            addLine("BETTER LUCK NEXT TIME");
+            addLine();
+            addLine();
+            addLine("SINCERELY");
+            addLine();
+            addLine("THE OREGON CITY CHAMBER OF COMMERCE");
+        }
+        
+        function victory() {
+            addLine();
+            addLine("YOU FINALLY ARRIVED AT OREGON CITY");
+            addLine("AFTER 2040 LONG MILES---HOORAY!!!!!");
+            addLine("A REAL PIONEER!");
+            addLine();
+            addLine("FOOD\tBULLETS\tCLOTHING\tMISC. SUPP.\tCASH");
+            addLine(`${Math.floor(gameState.food)}\t${Math.floor(gameState.bullets)}\t${Math.floor(gameState.clothing)}\t${Math.floor(gameState.miscSupplies)}\t${Math.floor(gameState.cash)}`);
+            addLine();
+            addLine("PRESIDENT JAMES K. POLK SENDS YOU HIS");
+            addLine("HEARTIEST CONGRATULATIONS");
+            addLine();
+            addLine("AND WISHES YOU A PROSPEROUS LIFE AHEAD");
+            addLine();
+            addLine("AT YOUR NEW HOME");
+        }
+        
+        // Initialize game
+        function init() {
+            addInput("DO YOU NEED INSTRUCTIONS (YES/NO)", (response) => {
+                if (response.toUpperCase() === "NO") {
+                    askShootingSkill();
+                } else {
+                    showInstructions();
+                }
+            });
+        }
+        
+        function askShootingSkill() {
+            addLine();
+            addLine();
+            addLine("HOW GOOD A SHOT ARE YOU WITH YOUR RIFLE?");
+            addLine("  (1) ACE MARKSMAN,  (2) GOOD SHOT,  (3) FAIR TO MIDDLIN'");
+            addLine("         (4) NEED MORE PRACTICE,  (5) SHAKY KNEES");
+            addLine("ENTER ONE OF THE ABOVE . THE BETTER YOU CLAIM YOU ARE, THE");
+            addLine("FASTER YOU'LL HAVE TO BE WITH YOUR GUN TO BE SUCCESSFUL.");
+            
+            addNumericInput("", (skill) => {
+                if (skill > 5) {
+                    gameState.shootingSkill = 0;
+                } else {
+                    gameState.shootingSkill = skill;
+                }
+                startPurchases();
+            });
+        }
+        
+        // Start the game
+        init();
+    </script>
+</body>
+</html>
